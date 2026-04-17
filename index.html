@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Secure Monitoring Core</title>
+
+<style>
+body {
+    background:#05080c;
+    color:#00ffcc;
+    font-family:Consolas, monospace;
+    margin:0;
+}
+
+.header {
+    background:#0f1a24;
+    padding:10px;
+    border-bottom:1px solid #003333;
+    font-size:12px;
+}
+
+.grid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    padding:10px;
+}
+
+.panel {
+    background:#0f1a24;
+    border:1px solid #003333;
+    padding:10px;
+}
+
+.title {
+    color:#00ffaa;
+    font-size:12px;
+    margin-bottom:5px;
+}
+
+.log {
+    white-space:pre-line;
+    font-size:11px;
+    height:140px;
+    overflow:hidden;
+}
+
+.status { font-size:18px; }
+.safe { color:#00ff88; }
+.warn { color:#ffaa00; }
+.danger { color:#ff4444; }
+
+.metric {
+    font-size:14px;
+    margin-top:5px;
+}
+
+canvas {
+    width:100%;
+    height:70px;
+    background:#050505;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+SECURE CORE • ACTIVE SESSION
+</div>
+
+<div class="grid">
+
+<div class="panel">
+<div class="title">Device</div>
+<div id="device"></div>
+</div>
+
+<div class="panel">
+<div class="title">Network</div>
+<div id="network"></div>
+</div>
+
+<div class="panel">
+<div class="title">Status</div>
+<div id="status" class="status">INITIALIZING</div>
+</div>
+
+<div class="panel">
+<div class="title">Session Time</div>
+<div id="time">0s</div>
+</div>
+
+<div class="panel">
+<div class="title">Metrics</div>
+<div class="metric" id="speed">Transfer: 0 MB/s</div>
+<div class="metric" id="cpu">CPU Load: 0%</div>
+</div>
+
+<div class="panel">
+<div class="title">System Log</div>
+<div id="log" class="log"></div>
+</div>
+
+<div class="panel">
+<div class="title">Data Flow</div>
+<canvas id="chart1"></canvas>
+</div>
+
+<div class="panel">
+<div class="title">System Load</div>
+<canvas id="chart2"></canvas>
+</div>
+
+</div>
+
+<script>
+const log = document.getElementById("log");
+const statusBox = document.getElementById("status");
+const deviceBox = document.getElementById("device");
+const networkBox = document.getElementById("network");
+const timeBox = document.getElementById("time");
+const speedBox = document.getElementById("speed");
+const cpuBox = document.getElementById("cpu");
+
+const ctx1 = document.getElementById("chart1").getContext("2d");
+const ctx2 = document.getElementById("chart2").getContext("2d");
+
+// 📱 device
+let device = "Unknown";
+if (navigator.userAgent.includes("Android")) device = "Android";
+else if (navigator.userAgent.includes("iPhone")) device = "iPhone";
+else if (navigator.userAgent.includes("Windows")) device = "Windows";
+else if (navigator.userAgent.includes("Mac")) device = "Mac";
+deviceBox.innerHTML = device;
+
+// 🌐 network
+function rand(a,b){return Math.floor(Math.random()*(b-a)+a);}
+function ip(){return `${rand(10,250)}.${rand(0,255)}.${rand(0,255)}.${rand(1,254)}`;}
+const cities=["Warsaw","Berlin","Paris","Amsterdam","Prague","Vienna"];
+networkBox.innerHTML = ip()+" • "+cities[rand(0,cities.length)];
+
+// ⏱️ timer
+let seconds=0;
+setInterval(()=>{seconds++;timeBox.innerHTML=seconds+"s";},1000);
+
+// 📊 metrics
+setInterval(()=>{
+    speedBox.innerHTML="Transfer: "+(Math.random()*50).toFixed(2)+" MB/s";
+    cpuBox.innerHTML="CPU Load: "+Math.floor(Math.random()*100)+"%";
+},800);
+
+// 🧠 logi
+const lines=[
+"> Booting secure core...",
+"> Loading modules...",
+"[OK] core ready",
+
+"> Checking environment...",
+"[OK] stable",
+
+"> Scanning processes...",
+"[NOTICE] background activity",
+
+"> Monitoring traffic...",
+"[NOTICE] irregular pattern",
+
+"> Running diagnostics...",
+"[OK] no critical issues",
+
+"> Deep analysis...",
+"> Mapping layers...",
+"> Checking integrity...",
+
+"[WARNING] anomaly detected",
+
+"> Reanalyzing...",
+"> Stabilizing system..."
+];
+
+let i=0;
+
+function typeLine(){
+    if(i<lines.length){
+        log.innerHTML+=lines[i]+"\n";
+        i++;
+        setTimeout(typeLine,120);
+    } else {
+        startSystem();
+    }
+}
+
+// 📊 wykresy
+function draw(ctx,speed){
+    let offset=0;
+    setInterval(()=>{
+        ctx.fillStyle="#050505";
+        ctx.fillRect(0,0,300,70);
+
+        ctx.beginPath();
+        ctx.moveTo(0,35);
+
+        for(let x=0;x<300;x+=5){
+            let y=35+Math.sin((x+offset)/20)*10+(Math.random()*6-3);
+            ctx.lineTo(x,y);
+        }
+
+        ctx.strokeStyle="#00ffcc";
+        ctx.stroke();
+
+        offset+=speed;
+    },100);
+}
+
+function startSystem(){
+    draw(ctx1,5);
+    draw(ctx2,3);
+
+    setTimeout(()=>{
+        statusBox.innerHTML="ANALYSIS";
+        statusBox.className="status warn";
+    },2000);
+
+    setTimeout(()=>{
+        statusBox.innerHTML="ALERT";
+        statusBox.className="status danger";
+        log.innerHTML+="\n[ALERT] anomaly detected\n";
+    },4000);
+
+    setTimeout(()=>{
+        statusBox.innerHTML="SECURED";
+        statusBox.className="status safe";
+        log.innerHTML+="\n[OK] system secured\n";
+    },7000);
+
+    setTimeout(()=>{
+        log.innerHTML+="\n\n[INFO] To jest symulacja edukacyjna\n";
+    },9000);
+}
+
+typeLine();
+</script>
+
+</body>
+</html>
